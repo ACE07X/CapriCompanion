@@ -2,7 +2,7 @@
 
 A local-first Windows desktop companion inspired by Capri from *Cyberpunk: Edgerunners 2*. It runs Qwen3.5 4B through Ollama, uses offline speech tools, keeps chat and approved memories on this PC, and offers permission-gated screen and desktop actions.
 
-**Repository status:** private personal project. Capri sprites come from a separate noncommercial project; see [`CAPRI_ASSET_LICENSE.md`](CAPRI_ASSET_LICENSE.md). This repo does not yet grant a general license to the companion source code.
+**Repository visibility:** public. Capri sprites come from a separate noncommercial project; see [`CAPRI_ASSET_LICENSE.md`](CAPRI_ASSET_LICENSE.md). This repo does not yet grant a general license to the companion source code.
 
 ## What is included
 
