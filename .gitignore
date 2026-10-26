@@ -1,0 +1,11 @@
+.venv/
+.setup-temp/
+.capri-data/
+__pycache__/
+*.py[cod]
+*.log
+.env
+.env.*
+!.env.example
+Thumbs.db
+.DS_Store

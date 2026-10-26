@@ -1,0 +1,4 @@
+vosk==0.3.45
+kokoro-onnx==0.6.1
+pywebview==6.2.1
+Pillow==13.0.0
