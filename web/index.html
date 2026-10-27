@@ -63,7 +63,7 @@
           <div class="orbit orbit-two"></div>
           <div class="avatar" id="avatar" data-state="idle" aria-label="Animated Capri avatar">
             <canvas class="capri-sprite" id="capri-sprite" width="480" height="768" hidden aria-label="Animated Capri sprite"></canvas>
-            <img class="avatar-photo" id="avatar-photo" src="/assets/capri.png" alt="Capri avatar from the open-source Capri desktop project">
+            <img class="avatar-photo" id="avatar-photo" src="/assets/capri.png" alt="Capri fan artwork by Lachy, used under PolyForm Noncommercial 1.0.0">
             <svg viewBox="0 0 300 360" role="img" aria-label="An original neon cyberpunk hologram with a luminous mask">
               <defs>
                 <linearGradient id="mane" x1="0" y1="0" x2="1" y2="1">
@@ -162,7 +162,8 @@
         <div class="composer-wrap">
           <div class="composer-tools">
             <button class="mic-button" id="mic-button" title="Start or stop voice input" aria-label="Start voice input"><span class="mic-symbol">◉</span><span id="mic-label">VOICE CHAT</span></button>
-            <span class="input-hint">Tap VOICE CHAT to talk. Ask me to look at your screen; I’ll ask first.</span>
+            <button class="text-button hidden" id="stop-speech" type="button" title="Stop Capri talking (Esc)">■ STOP VOICE</button>
+            <span class="input-hint">Tap VOICE CHAT to talk. Esc stops her voice. Ask me to look at your screen; I’ll ask first.</span>
           </div>
           <div class="composer">
             <textarea id="message-input" rows="1" maxlength="8000" placeholder="Say something, choom…" aria-label="Message Capri"></textarea>
@@ -179,10 +180,10 @@
       <button class="modal-close" data-close="setup-modal" aria-label="Close">×</button>
       <div class="eyebrow">ONE-TIME SETUP</div>
       <h2 id="setup-title">Give me a local brain.</h2>
-      <p>The default is Qwen3.5 4B: about 3.3–4.0 GB on disk, with a 3K context to leave more room for your other apps and games. It stays loaded while Capri is open so it does not reload for every conversation.</p>
+      <p>The default is Qwen3.5 4B: about 3.3–4.0 GB on disk, with a 2K context window to leave more room for your other apps and games. It stays loaded while Capri is open so it does not reload for every conversation.</p>
       <ol>
-        <li>Open the <b>CapriCompanion</b> folder in your outputs.</li>
-        <li>Run <b>setup_local_model.ps1</b>. It asks before installing anything.</li>
+        <li>Open the Capri project folder (the one containing <b>run_capri.bat</b>).</li>
+        <li>Double-click <b>setup_local_model.bat</b>. It asks before installing anything.</li>
         <li>Wait for Ollama, the model, and offline voice files to download once.</li>
         <li>When the download finishes, use ↻ to refresh. If Capri was closed, start <b>run_capri.bat</b>.</li>
       </ol>
@@ -197,6 +198,7 @@
       <div class="eyebrow">STORED ONLY ON THIS PC</div>
       <h2 id="memory-title">What should I remember?</h2>
       <p>Tell Capri “remember I like…” to save a hobby, preference, or project. She asks before saving. Chat history and approved notes stay on this PC; edit or clear either whenever you want. Never store passwords or secrets.</p>
+      <p class="small-print">To fit her small context window, Capri reads about the most recent 900 characters here (roughly 15 short notes). Keep the notes you care about at the bottom, and trim old ones.</p>
       <textarea id="memory-input" rows="7" maxlength="15000" placeholder="Examples: I prefer short answers. I’m building a game mod and Capri Companion…"></textarea>
       <div class="modal-actions"><button class="text-button" id="memory-clear">CLEAR MEMORY</button><button class="primary-button" id="memory-save">SAVE MEMORY</button></div>
     </div>
@@ -206,3 +208,4 @@
   <audio id="speech-audio" preload="none"></audio>
 </body>
 </html>
+

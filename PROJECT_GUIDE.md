@@ -11,7 +11,7 @@ The app is a hobby project, not an official Cyberpunk product. The bundled fan a
 ## Run it
 
 1. Use Windows with an NVIDIA driver, Python, and Ollama installed.
-2. Open the project folder and run setup_local_model.ps1 once. It explains the one-time downloads and asks before installing or downloading anything.
+2. Open the project folder and double-click setup_local_model.bat once (it runs setup_local_model.ps1). It explains the one-time downloads and asks before installing or downloading anything.
 3. Start Capri with run_capri.bat.
 4. The first model reply after launching may take longer while Ollama loads Qwen. The model remains loaded while Capri is open and is unloaded when the app exits.
 
@@ -94,6 +94,7 @@ Do not add those local folders to Git. They can contain private conversations, p
 
 - The Capri desktop sprite source is https://github.com/lachydotmcg/capri-desktop. Preserve the required notice and the bundled CAPRI_ASSET_LICENSE.md.
 - The sprite artwork is covered by PolyForm Noncommercial 1.0.0. It may be used for personal hobby purposes under those terms; commercial use is not granted.
+- mochiiwuff/capri-desktop uses MIT for its source code, while its README excludes the anime-derived art from that license. It informed a small original pointer-lean and reaction-pose update; no code or art from it was copied. See THIRD_PARTY_NOTICES.md.
 - Qwen3.5 4B model listing: https://ollama.com/library/qwen3.5
 - Ollama for Windows: https://ollama.com/download/windows
 - Vosk: https://alphacephei.com/vosk/
@@ -116,5 +117,16 @@ Do not add those local folders to Git. They can contain private conversations, p
 - Text appears before voice generation completes; playback follows when the local audio is ready.
 - The synthetic Sky voice is not the anime actress's voice. The original anime voice is not included.
 - Spotify controls use Windows media keys and cannot report the active track.
-- The sprite artwork is noncommercial. The source code currently has no general license for redistribution or commercial reuse.
+- Original source code is copyright ACE07X and licensed MIT. The sprite artwork remains separately licensed for noncommercial use; see THIRD_PARTY_NOTICES.md.
 - Roadmap ideas include a Windows installer/tray control, optional window-scoped screen reading, a searchable archive, project-specific notes, and a speech stop button.
+
+## Security model (summary)
+
+- Approvals are server-enforced: the server issues a one-time approval ID when the model proposes an action, and `/api/execute-tool` runs only that stored action. See README for the full list of command restrictions.
+- The prompt sent to the 2,048-token model is budgeted: persona prompt first, then the newest message, saved memory (most recent ~900 characters), earlier turns, and recalled excerpts last. Previously a large memory file could push the persona prompt out of context.
+- The model is unloaded on every exit path (Exit button, window X, Ctrl+C), and the Exit button now closes the desktop window as well as the server.
+
+## Testing
+
+`python -m unittest discover -s tests -v` runs the suite on any OS. `ruff check .` and `node --check web/app.js` cover linting and JavaScript syntax. See README, "Development and tests".
+

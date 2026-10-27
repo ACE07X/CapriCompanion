@@ -1,0 +1,15 @@
+# Tooling configuration only; Capri is run from source (see README), not installed as a package.
+[tool.ruff]
+line-length = 140
+target-version = "py313"
+extend-exclude = [".venv", ".capri-data", ".setup-temp"]
+
+[tool.ruff.lint]
+select = ["E9", "F", "B", "UP", "S"]
+ignore = [
+  "S101",  # asserts are fine in tests
+  "S310",  # urlopen is only ever pointed at the loopback Ollama address
+  "S603",  # subprocess calls use fixed executables and validated arguments
+  "S607",
+]
+

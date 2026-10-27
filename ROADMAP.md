@@ -1,6 +1,6 @@
 # Roadmap
 
-This is a private, local-first companion project. The list separates what works now from ideas that remain.
+This is a local-first companion project. The list separates what works now from ideas that remain.
 
 ## Available now
 
@@ -13,14 +13,18 @@ This is a private, local-first companion project. The list separates what works 
 - Animated Capri idle, blink, grin, glitch, sleep, wake, and speech states, with optional local sound cues.
 - Neon yellow, hot-pink, red, and green interface palette, with anchored scanline and color-split glitch effects.
 - Approved Windows app/folder actions, Windows media keys, and defensive security guidance.
+- Server-enforced one-time approvals, a hardened read-only command validator, context budgeting for the 2K window, checksum-verified setup downloads, and an automated test suite with CI.
 
 ## Planned
 
 1. Package the app as a simple Windows installer with a tray icon and hide/show shortcut.
 2. Add optional window selection and better on-screen text reading, always after approval.
-3. Stream speech in short synchronized chunks and add a stop button, while keeping voice generation local.
+3. Stream speech in short synchronized chunks while keeping voice generation local. (A stop control, Esc and a STOP VOICE button, is done.)
 4. Add searchable chat archive and separate per-project notes with export and erase controls.
 5. Add useful read-only Windows checks and opt-in helpers that continue to show exact actions before running.
+6. Replace the deprecated `ScriptProcessorNode` microphone capture with an `AudioWorklet`.
+7. Pin `onnxruntime` and `numpy` in `requirements.txt` (they currently arrive through `kokoro-onnx`).
+8. Add a license for the source code.
 
 ## Guardrails
 
@@ -29,3 +33,4 @@ This is a private, local-first companion project. The list separates what works 
 - Screen capture requires a one-time approval and is not persisted.
 - Commands stay on a read-only allowlist, run as the normal user, and require approval.
 - Keep the Capri sprite artwork's noncommercial terms and attribution intact.
+

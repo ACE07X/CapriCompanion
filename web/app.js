@@ -4,6 +4,7 @@ const messageInput = $('#message-input');
 const sendButton = $('#send-button');
 const chatStatus = $('#chat-status');
 const avatar = $('#avatar');
+const avatarStage = $('.avatar-stage');
 const avatarPhoto = $('#avatar-photo');
 const capriSprite = $('#capri-sprite');
 const spriteContext = capriSprite.getContext('2d');
@@ -36,6 +37,11 @@ let lastActivityAt = performance.now();
 let nextIdleGlitchAt = performance.now() + 45000 + Math.random() * 45000;
 let speechSequence = 0;
 let speechAbort = null;
+let speechActive = false;
+let clearArmedTimer = null;
+let pointerFrame = 0;
+let pointerPosition = null;
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)');
 
 const spriteClips = {
   idle: { frames: 16, fps: 8 },
@@ -93,6 +99,7 @@ function setStatus(message, mode = '') {
 
 function setAvatar(state, copy) {
   avatar.dataset.state = state;
+  avatarStage.dataset.state = state;
   if (copy) $('#status-copy').textContent = copy;
   if (state !== 'sleeping') lastActivityAt = performance.now();
   if (['success', 'glitch', 'waking'].includes(state)) {
@@ -100,6 +107,42 @@ function setAvatar(state, copy) {
     setTimeout(() => { if (avatar.dataset.state === state) setAvatar('idle'); }, duration);
   }
 }
+
+function resetAvatarLook() {
+  avatar.style.removeProperty('--look-x');
+  avatar.style.removeProperty('--look-y');
+  avatar.style.removeProperty('--look-tilt');
+}
+
+function updateAvatarLook() {
+  pointerFrame = 0;
+  if (!pointerPosition || reduceMotion.matches) {
+    resetAvatarLook();
+    return;
+  }
+  const bounds = avatarStage.getBoundingClientRect();
+  const x = Math.max(-1, Math.min(1, (pointerPosition.x - bounds.left - bounds.width / 2) / (bounds.width / 2)));
+  const y = Math.max(-1, Math.min(1, (pointerPosition.y - bounds.top - bounds.height / 2) / (bounds.height / 2)));
+  avatar.style.setProperty('--look-x', `${(x * 3).toFixed(1)}px`);
+  avatar.style.setProperty('--look-y', `${(y * 2).toFixed(1)}px`);
+  avatar.style.setProperty('--look-tilt', `${(x * -1.2).toFixed(2)}deg`);
+}
+
+avatarStage.addEventListener('pointermove', (event) => {
+  if (event.pointerType === 'touch' || reduceMotion.matches) return;
+  pointerPosition = { x: event.clientX, y: event.clientY };
+  if (!pointerFrame) pointerFrame = requestAnimationFrame(updateAvatarLook);
+}, { passive: true });
+avatarStage.addEventListener('pointerleave', () => {
+  pointerPosition = null;
+  if (!pointerFrame) resetAvatarLook();
+});
+reduceMotion.addEventListener?.('change', (event) => {
+  if (event.matches) {
+    pointerPosition = null;
+    resetAvatarLook();
+  }
+});
 
 function playCyberSfx(kind = 'reply') {
   if (!sfxEnabled) return;
@@ -164,13 +207,13 @@ function drawSprite(name, frame) {
 }
 
 function animateCapriSprite() {
-  if (!spritesReady || capriSprite.hidden) return;
+  if (!spritesReady || capriSprite.hidden || document.hidden) return;
   const now = performance.now();
   const state = avatar.dataset.state;
   const stateClips = { thinking: 'grin', success: 'grin', error: 'glitch', glitch: 'glitch', sleeping: 'sleep', waking: 'wake' };
   const baseClip = stateClips[state] || 'idle';
   const clip = spriteClips[baseClip];
-  const baseFrame = Math.floor(now / 1000 * clip.fps) % clip.frames;
+  const baseFrame = reduceMotion.matches ? 0 : Math.floor(now / 1000 * clip.fps) % clip.frames;
   const canBlink = ['idle', 'listening', 'speaking'].includes(state);
   if (canBlink && !blinkStartedAt && now >= nextBlinkAt) {
     activeBlinkClip = state === 'idle' && Math.random() < 0.2 ? 'blink_glitch' : 'blink';
@@ -198,7 +241,7 @@ setInterval(() => {
   if (document.hidden) return;
   if (avatar.dataset.state === 'idle' && now - lastActivityAt > 150000) {
     setAvatar('sleeping', 'Signal low. Tap anywhere when you need me.');
-  } else if (avatar.dataset.state === 'idle' && now >= nextIdleGlitchAt) {
+  } else if (avatar.dataset.state === 'idle' && now >= nextIdleGlitchAt && !reduceMotion.matches) {
     nextIdleGlitchAt = now + 60000 + Math.random() * 90000;
     playCyberSfx('glitch');
     setAvatar('glitch', 'A little static. I’m fine.');
@@ -254,14 +297,9 @@ async function sendMediaAction(action) {
   }
 }
 
-function addMessage(role, content, save = true) {
-  const clean = String(content ?? '').trim();
-  if (!clean) return;
-  messages.push({ role, content: clean });
-  if (messages.length > 300) messages = messages.slice(-300);
+function buildMessage(role, label) {
   const welcome = chatLog.querySelector('.welcome');
   if (welcome) welcome.remove();
-
   const wrapper = document.createElement('div');
   wrapper.className = `message ${role}`;
   const badge = document.createElement('div');
@@ -271,33 +309,35 @@ function addMessage(role, content, save = true) {
   body.className = 'message-content';
   const speaker = document.createElement('span');
   speaker.className = 'speaker';
-  speaker.textContent = role === 'assistant' ? 'CAPRI' : 'YOU';
+  speaker.textContent = label || (role === 'assistant' ? 'CAPRI' : 'YOU');
   const text = document.createElement('span');
-  text.textContent = clean;
   body.append(speaker, text);
   wrapper.append(badge, body);
   chatLog.append(wrapper);
+  return { wrapper, text };
+}
+
+function addMessage(role, content, save = true) {
+  const clean = String(content ?? '').trim();
+  if (!clean) return;
+  messages.push({ role, content: clean });
+  if (messages.length > 300) messages = messages.slice(-300);
+  buildMessage(role).text.textContent = clean;
   chatLog.scrollTop = chatLog.scrollHeight;
   if (save) saveMessages();
 }
 
+// Errors and system notices are shown in the log but are NOT added to `messages`, so they are never
+// saved to the archive or sent back to the model as if Capri had said them.
+function addNotice(content) {
+  const { wrapper, text } = buildMessage('assistant', 'CAPRI · SYSTEM');
+  wrapper.classList.add('notice');
+  text.textContent = String(content ?? '').trim();
+  chatLog.scrollTop = chatLog.scrollHeight;
+}
+
 function createStreamingAssistantBubble() {
-  const welcome = chatLog.querySelector('.welcome');
-  if (welcome) welcome.remove();
-  const wrapper = document.createElement('div');
-  wrapper.className = 'message assistant';
-  const badge = document.createElement('div');
-  badge.className = 'message-badge';
-  badge.textContent = 'C';
-  const body = document.createElement('div');
-  body.className = 'message-content';
-  const speaker = document.createElement('span');
-  speaker.className = 'speaker';
-  speaker.textContent = 'CAPRI';
-  const text = document.createElement('span');
-  body.append(speaker, text);
-  wrapper.append(badge, body);
-  chatLog.append(wrapper);
+  const { text } = buildMessage('assistant');
   return (content) => {
     text.textContent = content;
     chatLog.scrollTop = chatLog.scrollHeight;
@@ -357,7 +397,7 @@ function addActionApproval(action) {
     deny.disabled = true;
     status.textContent = 'Waiting for your approved local action…';
     try {
-      const result = await apiJson('/api/execute-tool', { name: action.name, arguments: action.arguments || {} });
+      const result = await apiJson('/api/execute-tool', { approval_id: action.approval_id });
       if (action.name === 'see_screen' && result.image) {
         controls.remove();
         status.textContent = 'Approved · reviewing this one screenshot locally. The image will not be saved.';
@@ -501,19 +541,34 @@ function updateSfxButton() {
   button.setAttribute('aria-pressed', String(sfxEnabled));
 }
 
-async function refreshModels() {
-  $('#connection-foot').textContent = 'CHECKING LOCAL LINK…';
+// Rebuild a <select> only when its choices actually changed, so a periodic refresh never closes an
+// open dropdown or resets the user's pick.
+function syncOptions(select, entries) {
+  const current = Array.from(select.options, (option) => `${option.value}\u0000${option.textContent}`).join('\u0001');
+  const next = entries.map(([value, label]) => `${value}\u0000${label}`).join('\u0001');
+  if (current === next) return;
+  select.replaceChildren(...entries.map(([value, label]) => {
+    const option = document.createElement('option');
+    option.value = value;
+    option.textContent = label;
+    return option;
+  }));
+}
+
+function isBusy() {
+  return sending || recording || ['thinking', 'speaking', 'listening'].includes(avatar.dataset.state);
+}
+
+// `quiet` is used by the 30-second background check. It keeps the indicators current but does not
+// overwrite the avatar or status line unless the model actually became ready or unavailable.
+async function refreshModels({ quiet = false } = {}) {
+  const wasReady = modelReady;
+  if (!quiet) $('#connection-foot').textContent = 'CHECKING LOCAL LINK…';
   try {
     const data = await apiJson('/api/health');
     const voiceSelect = $('#voice-select');
     const availableVoices = data.voices && typeof data.voices === 'object' ? data.voices : {};
-    voiceSelect.replaceChildren();
-    for (const [voiceId, label] of Object.entries(availableVoices)) {
-      const option = document.createElement('option');
-      option.value = voiceId;
-      option.textContent = label;
-      voiceSelect.append(option);
-    }
+    syncOptions(voiceSelect, Object.entries(availableVoices));
     selectedVoice = Object.prototype.hasOwnProperty.call(availableVoices, selectedVoice)
       ? selectedVoice
       : (data.default_voice || 'af_sky');
@@ -527,36 +582,28 @@ async function refreshModels() {
     const availableModels = Array.isArray(data.models) ? data.models : [];
     const ready = Boolean(data.ollama && availableModels.length > 0);
     modelReady = ready;
-    select.replaceChildren();
-    for (const model of availableModels) {
-      const option = document.createElement('option');
-      option.value = model;
-      option.textContent = model;
-      select.append(option);
-    }
-    if (!availableModels.length) {
-      const option = document.createElement('option');
-      option.value = data.default_model;
-      option.textContent = `${data.default_model} · ${data.ollama ? 'not ready yet' : 'setup needed'}`;
-      select.append(option);
-      select.value = data.default_model;
-    } else if (!availableModels.includes(previous)) {
-      select.value = availableModels.includes(data.default_model) ? data.default_model : availableModels[0];
-    } else {
+    if (availableModels.length) {
+      syncOptions(select, availableModels.map((model) => [model, model]));
+      if (!availableModels.includes(previous)) previous = availableModels.includes(data.default_model) ? data.default_model : availableModels[0];
       select.value = previous;
+    } else {
+      syncOptions(select, [[data.default_model, `${data.default_model} · ${data.ollama ? 'not ready yet' : 'setup needed'}`]]);
+      select.value = data.default_model;
     }
     $('#status-dot').className = `online-dot ${ready ? 'ready' : 'error'}`;
     $('#status-label').textContent = ready ? 'LOCAL MODEL READY' : (data.ollama ? 'MODEL DOWNLOAD NEEDED' : 'LOCAL MODEL NOT RUNNING');
     $('#connection-foot').textContent = ready ? 'CONNECTED TO THIS PC' : (data.ollama ? 'WAITING FOR A LOCAL MODEL' : 'OPEN SETUP GUIDE');
+    localStorage.setItem('capri.model', select.value || data.default_model);
+    if ((quiet && ready === wasReady) || isBusy()) return;
     setAvatar(ready ? 'idle' : 'error', ready ? 'Your local little troublemaker is online.' : 'I need my local model before I can think.');
     if (!ready) setStatus(data.ollama ? 'The local model is not ready yet. Refresh after setup finishes.' : 'Run the one-time setup, then refresh the model list.', 'error');
-    else setStatus(data.voice_ready ? 'Messages and voice are processed on this PC.' : 'Local chat is ready. Run setup_local_model.ps1 to install Capri’s new offline voice.');
-    localStorage.setItem('capri.model', select.value || data.default_model);
+    else setStatus(data.voice_ready ? 'Messages and voice are processed on this PC.' : 'Local chat is ready. Run setup_local_model.bat to install Capri’s offline voice.');
   } catch (error) {
     modelReady = false;
     $('#status-dot').className = 'online-dot error';
     $('#status-label').textContent = 'LOCAL LINK UNAVAILABLE';
     $('#connection-foot').textContent = 'OPEN SETUP GUIDE';
+    if ((quiet && !wasReady) || isBusy()) return;
     setAvatar('error', 'I can’t reach the local model runner yet.');
     setStatus(error.message, 'error');
   }
@@ -607,8 +654,7 @@ async function sendMessage(textOverride = null) {
       else setAvatar('success', 'There. A thought with the right amount of trouble.');
     }
   } catch (error) {
-    const message = `Local hiccup: ${error.message}`;
-    addMessage('assistant', message);
+    addNotice(`Local hiccup: ${error.message}`);
     setAvatar('error', 'The local link threw a spark.');
     setStatus(error.message, 'error');
     showToast(error.message, true);
@@ -628,7 +674,14 @@ function spokenText(text) {
     .trim();
 }
 
+function setSpeechActive(active) {
+  speechActive = active;
+  $('#stop-speech').classList.toggle('hidden', !active);
+}
+
 function stopSpeech() {
+  const wasActive = speechActive;
+  setSpeechActive(false);
   speechSequence += 1;
   if (speechAbort) speechAbort.abort();
   speechAbort = null;
@@ -637,6 +690,7 @@ function stopSpeech() {
   speechAudio.onerror = null;
   speechAudio.pause();
   speechAudio.currentTime = 0;
+  return wasActive;
 }
 
 async function speak(text, forcePreview = false, onReady = null) {
@@ -649,6 +703,7 @@ async function speak(text, forcePreview = false, onReady = null) {
   const requestId = speechSequence;
   const controller = new AbortController();
   speechAbort = controller;
+  setSpeechActive(true);
   try {
     setAvatar('thinking', 'Finding the right words for the offline voice…');
     const response = await fetch('/api/speak', {
@@ -662,7 +717,7 @@ async function speak(text, forcePreview = false, onReady = null) {
       throw new Error(data.error || 'Offline speech output is not ready.');
     }
     const blob = await response.blob();
-    if (requestId !== speechSequence) return;
+    if (requestId !== speechSequence) { reveal(); return; }
     const oldUrl = speechAudio.dataset.url;
     if (oldUrl) URL.revokeObjectURL(oldUrl);
     const url = URL.createObjectURL(blob);
@@ -675,6 +730,7 @@ async function speak(text, forcePreview = false, onReady = null) {
     };
     speechAudio.onended = () => {
       if (requestId !== speechSequence) return;
+      setSpeechActive(false);
       playCyberSfx('end');
       setAvatar('success', 'That one came through clean.');
     };
@@ -683,6 +739,7 @@ async function speak(text, forcePreview = false, onReady = null) {
   } catch (error) {
     reveal();
     if (error.name === 'AbortError') return;
+    if (requestId === speechSequence) setSpeechActive(false);
     setAvatar('idle', 'Voice is on, but local speech needs setup.');
     playCyberSfx('glitch');
     showToast(error.message, true);
@@ -721,6 +778,7 @@ function resample(input, fromRate, toRate) {
 }
 
 async function startRecording() {
+  stopSpeech();
   if (!navigator.mediaDevices?.getUserMedia) throw new Error('This browser does not provide local microphone capture.');
   micStream = await navigator.mediaDevices.getUserMedia({ audio: { echoCancellation: true, noiseSuppression: true, channelCount: 1 } });
   audioContext = new AudioContext();
@@ -844,7 +902,7 @@ messageInput.addEventListener('keydown', (event) => {
 });
 messageInput.addEventListener('input', () => { messageInput.style.height = 'auto'; messageInput.style.height = `${Math.min(messageInput.scrollHeight, 160)}px`; });
 $('#mic-button').addEventListener('click', toggleRecording);
-$('#refresh-models').addEventListener('click', refreshModels);
+$('#refresh-models').addEventListener('click', () => refreshModels());
 $('#security-check').addEventListener('click', checkSecurity);
 $('#setup-open').addEventListener('click', () => $('#setup-modal').classList.remove('hidden'));
 $('#memory-open').addEventListener('click', openMemory);
@@ -883,12 +941,23 @@ $('#voice-select').addEventListener('change', () => {
 });
 $('#voice-preview').addEventListener('click', () => speak('Hey, choom. You made it back. What trouble are we getting into?', true));
 $('#clear-chat').addEventListener('click', () => {
+  const button = $('#clear-chat');
   if (!messages.length) return;
+  if (!clearArmedTimer) {
+    button.textContent = 'CLICK AGAIN TO ERASE';
+    button.classList.add('armed');
+    clearArmedTimer = setTimeout(() => { clearArmedTimer = null; button.textContent = 'CLEAR CHAT'; button.classList.remove('armed'); }, 4000);
+    return;
+  }
+  clearTimeout(clearArmedTimer);
+  clearArmedTimer = null;
+  button.textContent = 'CLEAR CHAT';
+  button.classList.remove('armed');
   messages = [];
   localStorage.removeItem(messagesKey);
   apiJson('/api/history', { messages: [] }).catch((error) => showToast(`Chat history could not be cleared: ${error.message}`, true));
   renderMessages();
-  setStatus('This browser’s local chat history was cleared.');
+  setStatus('Chat history was cleared from this PC.');
 });
 $('#model-select').addEventListener('change', () => localStorage.setItem('capri.model', $('#model-select').value));
 $('#exit-button').addEventListener('click', async () => {
@@ -900,13 +969,22 @@ $('#exit-button').addEventListener('click', async () => {
 document.querySelectorAll('[data-close]').forEach((button) => button.addEventListener('click', () => $(`#${button.dataset.close}`).classList.add('hidden')));
 document.querySelectorAll('.modal-backdrop').forEach((modal) => modal.addEventListener('click', (event) => { if (event.target === modal) modal.classList.add('hidden'); }));
 
+$('#stop-speech').addEventListener('click', () => { stopSpeech(); setAvatar('idle', 'Okay, quiet.'); });
+document.addEventListener('keydown', (event) => {
+  if (event.key !== 'Escape') return;
+  const openModal = document.querySelector('.modal-backdrop:not(.hidden)');
+  if (openModal) { openModal.classList.add('hidden'); return; }
+  if (recording) { discardRecording().then(() => { setAvatar('idle', 'Recording discarded.'); setStatus('Recording discarded. Nothing was sent.'); }); return; }
+  if (stopSpeech()) setAvatar('idle', 'Okay, quiet.');
+});
+
 updateVoiceButton();
 updateSfxButton();
 apiJson('/api/avatar-status').then((data) => { if (data.available) showSavedAvatar(); else showOriginalAvatar(); }).catch(() => {});
 renderMessages();
 historyReadyPromise = restoreHistory();
 refreshModels();
-setInterval(refreshModels, 30000);
+setInterval(() => { if (!document.hidden) refreshModels({ quiet: true }); }, 30000);
 
 const cityLines = [
   'Your signal stays on this PC. Desktop actions wait for your approval.',
@@ -929,3 +1007,4 @@ function updateCityPulse() {
 }
 updateCityPulse();
 setInterval(updateCityPulse, 20000);
+

@@ -1,6 +1,6 @@
 # Project file guide
 
-These are the source and documentation files intended for the private repository. Runtime data, model weights, voice files, and installed packages remain local and are excluded by `.gitignore`.
+These are the source and documentation files intended for the repository. Runtime data, model weights, voice files, and installed packages remain local and are excluded by `.gitignore`.
 
 | File or folder | Description |
 | --- | --- |
@@ -10,10 +10,18 @@ These are the source and documentation files intended for the private repository
 | `PROJECT_FILES.md` | This tracked-file inventory. |
 | `.gitignore` | Excludes local memory, chats, avatars, model downloads, environments, and temporary files. |
 | `CAPRI_ASSET_LICENSE.md` | Required attribution and PolyForm Noncommercial terms for the third-party Capri art. |
+| `LICENSE` | MIT license for original CapriCompanion source code, copyright ACE07X. |
+| `THIRD_PARTY_NOTICES.md` | Separates ACE07X source ownership from fan art terms and upstream project references. |
 | `companion.py` | Local web server, Ollama requests, user memory, screen capture, approved tools, Vosk, and Kokoro voice. |
 | `requirements.txt` | Python package versions needed by the app, including Pillow for screen capture. |
 | `setup_local_model.ps1` | Confirmation-gated installation and download of the local model and speech assets. |
+| `setup_local_model.bat` | Double-click wrapper that runs the setup script (double-clicking a `.ps1` opens it in an editor instead). |
 | `run_capri.bat` | Launches Capri in a native Windows desktop window. |
+| `tests/test_companion.py` | Unit and server tests (stdlib `unittest`, fake Ollama; no GPU or Windows needed). |
+| `pyproject.toml` | Ruff lint configuration. |
+| `.gitattributes` | Forces CRLF for `.bat`/`.ps1`, LF elsewhere. |
+| `.github/workflows/ci.yml` | CI: lint, tests, JS syntax, ASCII check, and PowerShell parse on Windows. |
+| `CHANGELOG.md` | What changed and why. |
 | `web/index.html` | Chat, voice, memory, sound-effect, media, avatar, and setup UI. |
 | `web/styles.css` | Neon yellow, hot-pink, red, and green theme; responsive layout; avatar animation effects. |
 | `web/app.js` | Streamed local chat, local archive, voice playback, avatar reactions, approval cards, and local controls. |
@@ -32,3 +40,4 @@ The following local-only paths are intentionally excluded:
 - `.capri-data/` — chats, memory notes, custom avatar, WebView profile, models, and voice files.
 - `.venv/` — installed Python packages.
 - `.setup-temp/` — temporary downloads and setup cache.
+

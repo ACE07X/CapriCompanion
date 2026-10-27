@@ -1,0 +1,46 @@
+name: CI
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  checks:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+      - name: Install tools
+        run: pip install ruff pillow
+      - name: Lint
+        run: ruff check .
+      - name: Unit and server tests
+        run: python -m unittest discover -s tests -v
+      - name: JavaScript syntax
+        run: node --check web/app.js
+      - name: Windows scripts must be ASCII (Windows PowerShell 5.1 misreads BOM-less UTF-8)
+        run: |
+          if grep -nP '[^\x00-\x7F]' setup_local_model.ps1 run_capri.bat setup_local_model.bat; then
+            echo "Non-ASCII characters found in a Windows script"; exit 1
+          fi
+
+  windows-scripts:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Parse setup_local_model.ps1
+        shell: pwsh
+        run: |
+          $errors = $null
+          [System.Management.Automation.Language.Parser]::ParseFile("$PWD/setup_local_model.ps1", [ref]$null, [ref]$errors) | Out-Null
+          if ($errors) { $errors | ForEach-Object { Write-Error $_.Message }; exit 1 }
+          Write-Host 'setup_local_model.ps1 parsed cleanly'
+
