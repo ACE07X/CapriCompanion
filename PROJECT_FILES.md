@@ -12,6 +12,7 @@ These are the source and documentation files intended for the repository. Runtim
 | `CAPRI_ASSET_LICENSE.md` | Required attribution and PolyForm Noncommercial terms for the third-party Capri art. |
 | `LICENSE` | MIT license for original CapriCompanion source code, copyright ACE07X. |
 | `THIRD_PARTY_NOTICES.md` | Separates ACE07X source ownership from fan art terms and upstream project references. |
+| `CLAUDE_BUILD_REFERENCE.md` | Complete file maps, feature/function descriptions, ranked model and voice options, reuse boundaries, and Claude implementation guidance. |
 | `AI_PROJECT_RESEARCH.md` | GitHub AI projects reviewed, useful ideas, and separate code/art license boundaries. |
 | `companion.py` | Local web server, Ollama requests, user memory, screen capture, approved desktop/file tools, Vosk, and Kokoro voice. |
 | `requirements.txt` | Python package versions needed by the app, including Pillow for screen capture. |
