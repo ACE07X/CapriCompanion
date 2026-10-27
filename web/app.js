@@ -354,6 +354,17 @@ function describeAction(action) {
     case 'open_personal_folder': return `Open your ${folderLabels[args.folder] || 'personal'} folder.`;
     case 'check_windows_security': return 'Read the current Windows Defender and firewall status.';
     case 'see_screen': return 'Capture one image of your primary screen and send it to Capri’s local vision model. The screenshot is temporary and will not be saved.';
+    case 'list_local_files': {
+      const folders = { documents: 'Documents', downloads: 'Downloads', desktop: 'Desktop' };
+      const folder = folders[args.folder] || 'selected folder';
+      const subfolder = String(args.path || '').slice(0, 240);
+      return `List up to 60 visible names in ${folder}${subfolder ? `\\${subfolder}` : ''}. This is non-recursive; hidden and sensitive-looking entries are skipped. The listing will not be saved to chat history.`;
+    }
+    case 'read_local_file': {
+      const folders = { documents: 'Documents', downloads: 'Downloads', desktop: 'Desktop' };
+      const folder = folders[args.folder] || 'selected folder';
+      return `Read up to 4,000 characters from ${folder}\\${String(args.path || '').slice(0, 260)} and send a bounded excerpt to the local model for this reply only. The excerpt will not be saved to chat history.`;
+    }
     case 'run_command': {
       const folders = { home: 'Home', documents: 'Documents', downloads: 'Downloads', desktop: 'Desktop', app: 'Capri app folder' };
       return `Run this read-only Windows command once in ${folders[args.directory] || 'Home'}:\n${String(args.command || '').slice(0, 1200)}`;
@@ -398,6 +409,52 @@ function addActionApproval(action) {
     status.textContent = 'Waiting for your approved local action…';
     try {
       const result = await apiJson('/api/execute-tool', { approval_id: action.approval_id });
+      if (action.name === 'list_local_files') {
+        controls.remove();
+        status.textContent = 'Approved · names were read locally and not saved to chat history.';
+        const { wrapper, text } = buildMessage('assistant', 'CAPRI · FILE LIST · NOT SAVED');
+        wrapper.classList.add('notice');
+        text.textContent = result.message || 'No visible entries were found.';
+        chatLog.scrollTop = chatLog.scrollHeight;
+        setAvatar('success', 'Local file names are ready.');
+        setStatus('Approved local file listing. The result was not saved.');
+        return;
+      }
+      if (action.name === 'read_local_file') {
+        controls.remove();
+        status.textContent = 'Approved · sending a bounded excerpt to local Ollama for a one-turn summary…';
+        addNotice('The approved excerpt is being used for this local reply only. It is not saved to chat history or memory.');
+        setAvatar('thinking', 'Reading one approved local excerpt…');
+        setStatus('Summarizing the approved file excerpt locally…', 'busy');
+        try {
+          const requestText = [...messages].reverse().find((item) => item.role === 'user')?.content || 'Summarize this file excerpt.';
+          const answerBubble = createStreamingAssistantBubble();
+          const summary = await streamChat({
+            model: $('#model-select').value,
+            messages: [{ role: 'user', content: requestText }],
+            allow_tools: false,
+            untrusted_context: result.file_text || '',
+          }, (partial) => {
+            answerBubble(partial);
+            setStatus('Capri is summarizing the approved excerpt…', 'busy');
+          });
+          const reply = (summary.reply || '').trim() || 'I could not find enough readable text in that excerpt to summarize.';
+          answerBubble(reply);
+          messages.push({ role: 'assistant', content: reply });
+          if (messages.length > 300) messages = messages.slice(-300);
+          saveMessages();
+          status.textContent = 'File review complete · excerpt discarded after this local request.';
+          setAvatar('success', 'Excerpt reviewed; the source text was not kept.');
+          setStatus('Local file summary complete. Source text was not saved.');
+          if (voiceEnabled) void speak(reply);
+        } catch (error) {
+          status.textContent = `The file was read, but its summary failed: ${error.message}`;
+          addNotice(`The local summary could not finish: ${error.message}`);
+          setAvatar('error', 'The local summary link dropped.');
+          setStatus(error.message, 'error');
+        }
+        return;
+      }
       if (action.name === 'see_screen' && result.image) {
         controls.remove();
         status.textContent = 'Approved · reviewing this one screenshot locally. The image will not be saved.';
@@ -1007,4 +1064,3 @@ function updateCityPulse() {
 }
 updateCityPulse();
 setInterval(updateCityPulse, 20000);
-

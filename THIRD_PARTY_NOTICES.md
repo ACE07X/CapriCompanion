@@ -16,7 +16,12 @@ Its `LICENSE` is MIT for that repository's source code and identifies the copyri
 
 This project uses the repository as a design reference for pose-to-pose animation, cursor-aware reactions, and visual action beats. No source code or artwork from `mochiiwuff/capri-desktop` is redistributed here, so its MIT license does not apply to CapriCompanion files. If code from that repository is added later, preserve its MIT notice in a separate third-party license record and identify the affected files. Its excluded anime-derived artwork must not be treated as MIT-licensed.
 
+## solas2529/local-ollama-agent — research reference only
+
+Repository: <https://github.com/solas2529/local-ollama-agent>
+
+Its README identifies the project as MIT-licensed and documents allowed-root file tools, local Ollama, Qwen vision, and prompt-injection risks. CapriCompanion's bounded local file tools were written independently for this application's approval flow. No source code or artwork from this repository is redistributed here, so its MIT license does not apply to CapriCompanion files. See [`AI_PROJECT_RESEARCH.md`](AI_PROJECT_RESEARCH.md) for the feature comparison and reuse notes.
+
 ## Other references
 
 The current art credit and license terms are in [`CAPRI_ASSET_LICENSE.md`](CAPRI_ASSET_LICENSE.md). References to other projects in `README.md` describe inspiration or dependencies and do not transfer their licenses to this project's original code.
-

@@ -13,6 +13,7 @@ This is a local-first companion project. The list separates what works now from 
 - Animated Capri idle, blink, grin, glitch, sleep, wake, and speech states, with optional local sound cues.
 - Neon yellow, hot-pink, red, and green interface palette, with anchored scanline and color-split glitch effects.
 - Approved Windows app/folder actions, Windows media keys, and defensive security guidance.
+- Approved, read-only file listing and bounded UTF-8 text previews in Documents, Downloads, or Desktop; the local model receives a one-turn excerpt summary with action tools disabled, and raw file text/listings are not saved to chat history.
 - Server-enforced one-time approvals, a hardened read-only command validator, context budgeting for the 2K window, checksum-verified setup downloads, and an automated test suite with CI.
 
 ## Planned
@@ -24,7 +25,7 @@ This is a local-first companion project. The list separates what works now from 
 5. Add useful read-only Windows checks and opt-in helpers that continue to show exact actions before running.
 6. Replace the deprecated `ScriptProcessorNode` microphone capture with an `AudioWorklet`.
 7. Pin `onnxruntime` and `numpy` in `requirements.txt` (they currently arrive through `kokoro-onnx`).
-8. Add a license for the source code.
+8. Expand file reading only after the bounded preview flow has been exercised on Windows; keep images/PDFs and recursive search behind separate explicit design and approval work.
 
 ## Guardrails
 
@@ -33,4 +34,3 @@ This is a local-first companion project. The list separates what works now from 
 - Screen capture requires a one-time approval and is not persisted.
 - Commands stay on a read-only allowlist, run as the normal user, and require approval.
 - Keep the Capri sprite artwork's noncommercial terms and attribution intact.
-

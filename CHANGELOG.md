@@ -34,4 +34,6 @@
 - Cursor-aware avatar lean and short pose-based success/error reactions, implemented in CapriCompanion's own UI code after reviewing mochiiwuff's documented animation direction; no source or art from that project was copied.
 - `THIRD_PARTY_NOTICES.md` and explicit ACE07X source attribution, keeping the original code and separately licensed fan sprites distinct.
 - Added `LICENSE` with the user's selected MIT terms for original source code; art stays under its existing separate license.
-
+- Added individually approved, read-only file listing for Documents/Downloads/Desktop and bounded UTF-8 text/code previews with sensitive/hidden/system/reparse-path checks. A read preview goes only to local Ollama for a one-turn summary with tools, saved memory, and recalled chats disabled; raw excerpts and listings are not persisted.
+- Added `AI_PROJECT_RESEARCH.md` to record relevant local AI/voice projects and the license boundary decisions. File-tool design was informed by `solas2529/local-ollama-agent`, but no source code or artwork from that project was copied.
+- Reconfirmed that Mochiiwuff's MIT source license excludes their anime-derived avatar art. No Mochiiwuff artwork was redistributed; existing sprite art remains under Lachy's separate PolyForm Noncommercial license and notice.

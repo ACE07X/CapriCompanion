@@ -6,7 +6,7 @@ This is the handoff reference for the local Windows desktop companion. It record
 
 Capri is a local-first desktop companion inspired by Capri from Cyberpunk: Edgerunners 2. The app uses Qwen3.5 4B through Ollama for chat, Vosk for offline speech recognition, Kokoro-ONNX for offline speech output, and an animated Capri sprite from the open-source Capri desktop project.
 
-The app is a hobby project, not an official Cyberpunk product. The bundled fan artwork has a noncommercial license and required attribution. The companion source code does not currently declare a general reuse license. Keep the license notice with the artwork and check the terms before sharing or adapting the project.
+The app is a hobby project, not an official Cyberpunk product. Original CapriCompanion source code is copyright © 2026 ACE07X and licensed under MIT. The bundled fan artwork has separate noncommercial terms and required attribution; see `CAPRI_ASSET_LICENSE.md` and `THIRD_PARTY_NOTICES.md`.
 
 ## Run it
 
@@ -31,9 +31,9 @@ The setup script stores the Ollama model, Vosk model, Kokoro model, voice data, 
 
 ## Local actions and safety limits
 
-The app can propose a small set of actions: inspect one approved screenshot, run a fixed read-only Command Prompt allowlist, check Defender and Firewall status, open selected apps or folders, save notes, remember approved non-sensitive preferences, and send media keys to the active Windows player.
+The app can propose a small set of actions: inspect one approved screenshot, list names in one Documents/Downloads/Desktop folder, read one approved small text file from those folders, run a fixed read-only Command Prompt allowlist, check Defender and Firewall status, open selected apps or folders, save notes, remember approved non-sensitive preferences, and send media keys to the active Windows player.
 
-Actions require an approval card. Commands run as the normal user with a short timeout. The command helper rejects command chaining, redirects, and commands outside its allowlist. Capri cannot see which Spotify song is playing; the media buttons send Windows media keys to whichever player is active. Replay sends Previous, so Spotify may move to the prior track depending on playback position.
+Actions require a server-enforced, one-time approval card. File listings are non-recursive and skip hidden/system/sensitive-looking entries. Reads accept only UTF-8 text/code files up to 2 MB, send no more than a bounded excerpt to local Ollama for one summary, disable action tools for that summary, and do not save raw excerpts or listings into chat history. Commands run as the normal user with a short timeout. The command helper rejects command chaining, redirects, and commands outside its allowlist. Capri cannot see which Spotify song is playing; the media buttons send Windows media keys to whichever player is active. Replay sends Previous, so Spotify may move to the prior track depending on playback position.
 
 The cybersecurity guidance is defensive and permission-based. The app is not a remote-access tool, does not monitor the desktop continuously, and has no live threat-intelligence feed in offline mode.
 
@@ -70,11 +70,12 @@ Pinned Python packages are listed in requirements.txt. The setup script download
 
 - .gitignore — excludes local user data, model/voice downloads, temporary setup files, virtual environments, and caches.
 - README.md — concise overview, setup, features, privacy notes, and official model/engine references.
+- AI_PROJECT_RESEARCH.md — reviewed GitHub projects, useful ideas, and code/art license decisions.
 - PROJECT_GUIDE.md — this full handoff and technical reference.
 - PROJECT_FILES.md — short inventory of tracked files and ignored local-only folders.
 - ROADMAP.md — available features, planned work, and guardrails.
 - CAPRI_ASSET_LICENSE.md — required attribution and PolyForm Noncommercial terms for the bundled Capri fan artwork.
-- companion.py — local server, local-model integration, memory and chat archive, offline speech, screen capture, Windows tools, and streamed replies.
+- companion.py — local server, local-model integration, memory and chat archive, offline speech, screen capture, approved Windows/file tools, and streamed replies.
 - requirements.txt — pinned Python dependencies.
 - setup_local_model.ps1 — confirmation-gated setup for Ollama, Qwen, Vosk, and Kokoro assets.
 - run_capri.bat — starts the local model service and desktop app.
@@ -129,4 +130,3 @@ Do not add those local folders to Git. They can contain private conversations, p
 ## Testing
 
 `python -m unittest discover -s tests -v` runs the suite on any OS. `ruff check .` and `node --check web/app.js` cover linting and JavaScript syntax. See README, "Development and tests".
-

@@ -12,7 +12,8 @@ These are the source and documentation files intended for the repository. Runtim
 | `CAPRI_ASSET_LICENSE.md` | Required attribution and PolyForm Noncommercial terms for the third-party Capri art. |
 | `LICENSE` | MIT license for original CapriCompanion source code, copyright ACE07X. |
 | `THIRD_PARTY_NOTICES.md` | Separates ACE07X source ownership from fan art terms and upstream project references. |
-| `companion.py` | Local web server, Ollama requests, user memory, screen capture, approved tools, Vosk, and Kokoro voice. |
+| `AI_PROJECT_RESEARCH.md` | GitHub AI projects reviewed, useful ideas, and separate code/art license boundaries. |
+| `companion.py` | Local web server, Ollama requests, user memory, screen capture, approved desktop/file tools, Vosk, and Kokoro voice. |
 | `requirements.txt` | Python package versions needed by the app, including Pillow for screen capture. |
 | `setup_local_model.ps1` | Confirmation-gated installation and download of the local model and speech assets. |
 | `setup_local_model.bat` | Double-click wrapper that runs the setup script (double-clicking a `.ps1` opens it in an editor instead). |
@@ -40,4 +41,3 @@ The following local-only paths are intentionally excluded:
 - `.capri-data/` — chats, memory notes, custom avatar, WebView profile, models, and voice files.
 - `.venv/` — installed Python packages.
 - `.setup-temp/` — temporary downloads and setup cache.
-
