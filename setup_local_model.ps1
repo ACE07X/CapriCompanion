@@ -157,13 +157,11 @@ $ServiceReady = $false
 $env:OLLAMA_HOST = $OllamaHost
 $env:OLLAMA_MODELS = $OllamaModelsPath
 $env:OLLAMA_NO_CLOUD = '1'
-for ($i = 0; $i -lt 12; $i++) {
-    try {
-        Invoke-RestMethod -Uri "http://$OllamaHost/api/tags" -TimeoutSec 2 | Out-Null
-        $ServiceReady = $true
-        break
-    } catch { Start-Sleep -Seconds 2 }
-}
+# One quick probe: Capri's private port is usually free, so waiting here only wastes time.
+try {
+    Invoke-RestMethod -Uri "http://$OllamaHost/api/tags" -TimeoutSec 2 | Out-Null
+    $ServiceReady = $true
+} catch { $ServiceReady = $false }
 if (-not $ServiceReady) {
     Write-Host 'Starting the local Ollama service...' -ForegroundColor Cyan
     Start-Process -FilePath $OllamaExe -ArgumentList 'serve' -WindowStyle Hidden
@@ -181,9 +179,13 @@ Write-Host "Downloading $ModelName for a lighter fit on the RTX 4060..." -Foregr
 & $OllamaExe pull $ModelName
 if ($LASTEXITCODE -ne 0) { throw 'The local model download did not finish successfully.' }
 
+Write-Host 'Adding the Capri icon to your Desktop and Start menu...' -ForegroundColor Cyan
+try { & (Join-Path $ProjectPath 'install_desktop_shortcut.ps1') -Quiet }
+catch { Write-Host "The shortcut could not be created ($($_.Exception.Message)). Run install_desktop_shortcut.bat later." -ForegroundColor Yellow }
+
 Write-Host ''
 Write-Host 'Setup is complete.' -ForegroundColor Green
-Write-Host 'Run run_capri.bat in this folder to open Capri as a Windows desktop app.'
+Write-Host 'Double-click the Capri icon on your desktop to open her (or run run_capri.bat in this folder).'
 Write-Host 'All models are local after setup. Screen images are not saved. The voice runs on CPU; the 2K-context language model stays loaded while Capri is open and unloads when you exit.'
 Read-Host 'Press Enter to close'
 

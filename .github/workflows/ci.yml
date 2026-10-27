@@ -28,7 +28,7 @@ jobs:
         run: node --check web/app.js
       - name: Windows scripts must be ASCII (Windows PowerShell 5.1 misreads BOM-less UTF-8)
         run: |
-          if grep -nP '[^\x00-\x7F]' setup_local_model.ps1 run_capri.bat setup_local_model.bat; then
+          if grep -nP '[^\x00-\x7F]' setup_local_model.ps1 run_capri.bat setup_local_model.bat install_desktop_shortcut.ps1 install_desktop_shortcut.bat; then
             echo "Non-ASCII characters found in a Windows script"; exit 1
           fi
 
@@ -36,11 +36,20 @@ jobs:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
-      - name: Parse setup_local_model.ps1
+      - name: Parse PowerShell scripts
         shell: pwsh
         run: |
-          $errors = $null
-          [System.Management.Automation.Language.Parser]::ParseFile("$PWD/setup_local_model.ps1", [ref]$null, [ref]$errors) | Out-Null
-          if ($errors) { $errors | ForEach-Object { Write-Error $_.Message }; exit 1 }
-          Write-Host 'setup_local_model.ps1 parsed cleanly'
+          foreach ($script in 'setup_local_model.ps1', 'install_desktop_shortcut.ps1') {
+            $errors = $null
+            [System.Management.Automation.Language.Parser]::ParseFile("$PWD/$script", [ref]$null, [ref]$errors) | Out-Null
+            if ($errors) { $errors | ForEach-Object { Write-Error $_.Message }; exit 1 }
+            Write-Host "$script parsed cleanly"
+          }
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.13"
+      - name: Unit tests on Windows
+        run: |
+          pip install pillow
+          python -m unittest discover -s tests -v
 

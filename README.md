@@ -8,9 +8,16 @@ For a Claude-ready inventory of every tracked file, animation and desktop featur
 
 ## What is included
 
-- **Faster local chat:** Qwen3.5 4B uses a four-message recent context, a 2,048-token context window, and a 64-token reply cap for ordinary chat (144 for requests that need detail). Ordinary replies stream as they are generated, and only relevant PC-action definitions are sent to the model. The model stays loaded while Capri is open and unloads on exit; the first reply after launch still has to load it.
+- **Desktop app with Capri's face:** setup adds a **Capri** icon to your Desktop and Start menu. It opens her own window (no console) with her face on the taskbar, and she starts and stops her private Ollama service herself.
+- **She roams your desktop:** Capri floats along your taskbar, sits on top of the window you are using, peeks in from screen edges, and glitch-teleports around. Double-click her to chat, drag her anywhere, right-click for options. **Ctrl+Alt+C** shows or hides the chat.
+- **Optional online search:** switch **ONLINE** on and she can search the web (DuckDuckGo, Wikipedia fallback, or your own SearXNG/Brave key) and show her sources. Off by default; only your search words leave the PC.
+- **Optional power mode:** switch **POWER** on (per session) and she can propose any normal-user Command Prompt or PowerShell command. Every command still needs your approval, and wipe, security-change, download-and-run, and admin commands stay blocked.
+- **Music:** she can tell you which Spotify song is playing, open Spotify on a search for what you want to hear, skip, pause, and change the volume.
+- **Netrunner-deck interface:** a cyberpunk redesign with HUD frames, scanlines, glitch titles, live CPU/RAM/disk/battery meters, and a holo-tank avatar stage.
+- **More functions:** exact calculator, PC stats, timers with an alarm, volume up/down/mute, lock-PC, clipboard explain, and open-website, on top of screen help, file reads, media keys, notes, and memory. Read-only helpers run straight away; anything that changes your PC still needs approval.
+- **Faster local chat:** Qwen3.5 4B uses a six-message recent context, a 2,048-token context window (opt in to 4,096 with `CAPRI_NUM_CTX=4096`), and a 100-token reply cap for ordinary chat (300 for requests that need detail); a reply that hits the cap ends on its last full sentence. Ordinary replies stream as they are generated, and only relevant PC-action definitions are sent to the model. The model stays loaded while Capri is open and unloads on exit; the first reply after launch still has to load it.
 - **Stop controls:** press **Esc** (or the STOP VOICE button) to silence Capri mid-sentence; Esc also closes dialogs and discards an in-progress recording. Opening the microphone stops her voice automatically.
-- **Offline voice:** Vosk transcribes locally; Kokoro-ONNX uses the playful `af_sky` preset by default and runs on CPU with a four-thread limit. Text appears while the reply streams, then local voice generation starts. Bracketed visual cues are removed from speech, and optional sound effects are synthesized locally. The voice is an original preset, not a clone of the anime actor.
+- **Offline voice:** Vosk transcribes locally; Kokoro-ONNX runs on CPU with a four-thread limit. The default **Capri** voice is an original blend of Kokoro's `af_sky`, `af_nicole`, and `af_bella` styles lifted about a semitone, with an optional VOICE FX "digital construct" filter. Speech is synthesized sentence by sentence, so she starts talking after the first sentence. Bracketed visual cues are removed from speech, and optional sound effects are synthesized locally. The voice is an original preset, not a clone of the anime actor.
 - **Animated avatar:** Capri's original 240-pixel sprite cells use their proper frame counts. She stays anchored while her pose changes for thinking, speaking, glitches, waking, and sleeping; brief glitches add anime-style scanline and color-split flickers. You can select a local image; it stays in `.capri-data\avatar.webp`.
 - **Edgerunners color pass:** The dark interface uses neon yellow, hot pink, red, and green for focus, alerts, success, and avatar effects.
 - **User-controlled memory:** chat history is stored locally (up to 300 messages) and relevant older exchanges can be recalled. Say “remember I like…” to save a harmless hobby, preference, or project detail after approval. Edit or clear notes in the app. To fit her 2K context window, Capri reads roughly the most recent 900 characters of memory (about 15 short notes).
@@ -22,8 +29,8 @@ For a Claude-ready inventory of every tracked file, animation and desktop featur
 
 The expected PC has an RTX 4060 with 8 GB VRAM and an Intel Core i5-12400F. Qwen3.5 4B is about 3.3–4.0 GB on disk. A warm short-reply check showed text in 0.48 seconds and finished in 0.80 seconds; this is one local measurement. A cold request took about 90 seconds to show its first text while Ollama loaded the model. The first run downloads the model and speech assets; after that, chat, screen analysis, and voice work offline.
 
-1. Double-click `setup_local_model.bat` (it runs `setup_local_model.ps1`). The script asks before installing or downloading anything, and verifies the voice-model downloads against pinned SHA-256 checksums.
-2. Run `run_capri.bat`.
+1. Double-click `setup_local_model.bat` (it runs `setup_local_model.ps1`). The script asks before installing or downloading anything, verifies the voice-model downloads against pinned SHA-256 checksums, and adds the **Capri** desktop icon.
+2. Double-click the **Capri** icon (or run `run_capri.bat` to see a console for troubleshooting). If the icon is missing, run `install_desktop_shortcut.bat`.
 3. If the local model was installed while Capri was open, click the refresh button beside the model selector.
 
 Setup uses Python 3.13, Pillow for one-time screen capture, Ollama for Windows, `qwen3.5:4b`, Vosk, and Kokoro-82M ONNX voice files. The voice model is Apache-2.0 and its ONNX runtime is MIT-licensed. The Capri sprite artwork is from [lachydotmcg/capri-desktop](https://github.com/lachydotmcg/capri-desktop) under PolyForm Noncommercial 1.0.0; the required notice is in `CAPRI_ASSET_LICENSE.md`.
@@ -38,8 +45,11 @@ The 4B model reserves GPU memory while it is loaded. Capri keeps it warm while t
 
 Capri can touch your PC, so the limits are enforced by the server and not only by the interface:
 
-- **Approvals are enforced server-side.** When the model proposes an action, the server stores it and issues a one-time approval ID. `/api/execute-tool` runs *only* that stored action, once, within 15 minutes; the name and arguments in the request are ignored. A page, script, or other local process therefore cannot run arbitrary actions or supply its own arguments; at most it can trigger an action the model itself proposed, and every action the model can propose is limited to the bounded, allowlisted set below. (The approval card is a UI safeguard on a loopback server: a program already running as you on this PC could still start a chat and approve what the model proposes, so keep the PC itself trusted.) A failed run can be retried from the same card.
-- **Commands are validated before an approval card is even shown.** One command from a fixed read-only allowlist; no chaining, redirection, variables, or `^` escapes; `ipconfig` is limited to `/all`, `/allcompartments`, and `/displaydns` (so no `/release`, `/renew`, or `/flushdns`); `tasklist`, `systeminfo`, and `driverquery` cannot target another computer; network (UNC) paths are rejected so a command can never send your Windows credentials to a remote share.
+- **Only her own window can talk to her.** Each launch creates a secret key that is passed to the window in the URL fragment (never sent over HTTP, printed, or logged). Every `/api/` request must present it, so other programs, other Windows users, and web pages cannot use Capri's API even though they can reach `127.0.0.1`.
+- **Encrypted at rest.** Memory and chat history are encrypted with Windows DPAPI for your Windows account; copying `.capri-data` to another account or PC does not reveal them. API keys, tokens, private keys, passwords written as `password: …`, and card numbers are removed before anything is saved. The browser profile no longer holds a plaintext chat copy.
+
+- **Approvals are enforced server-side.** When the model proposes an action, the server stores it and issues a one-time approval ID. `/api/execute-tool` runs *only* that stored action, once, within 15 minutes; the name and arguments in the request are ignored. A page, script, or other local process therefore cannot run arbitrary actions or supply its own arguments; at most it can trigger an action the model itself proposed, and every action the model can propose is limited to the bounded, allowlisted set below. (The per-launch key blocks ordinary local programs, but malware already running as your Windows account can read process memory, so keep the PC itself trusted.) A failed run can be retried from the same card.
+- **Commands are validated before an approval card is even shown.** One command from a fixed read-only allowlist; no chaining, redirection, variables, or `^` escapes; `dir`, `tree`, `where`, and `cd` stay inside the chosen folder (no drive letters, absolute paths, `..`, hidden-file or recursive-search switches); `netstat` refresh intervals are refused and a timed-out command's whole process tree is stopped; `ipconfig` is limited to `/all`, `/allcompartments`, and `/displaydns` (so no `/release`, `/renew`, or `/flushdns`); `tasklist`, `systeminfo`, and `driverquery` cannot target another computer; network (UNC) paths are rejected so a command can never send your Windows credentials to a remote share.
 - **File access stays narrow.** Capri can list one folder at a time or read one specifically named file under Documents, Downloads, or Desktop; it does not recursively search. Reads are UTF-8 only, at most 2 MB from disk and 4,000 characters into the local app. Hidden/system/reparse-point entries, sensitive-looking names, unsupported extensions, and paths that escape the chosen folder are refused. The file excerpt is untrusted data: the summary request receives no saved memory, recalled chats, or PC-action tools, and the excerpt itself is not saved.
 - **No look-alike programs.** Commands run with `NoDefaultCurrentDirectoryInExePath` set and through full `System32` paths, so a file named `whoami.exe` dropped in Downloads is not launched.
 - **Loopback only.** The server binds to `127.0.0.1`, checks the `Host`, `Origin`, and `Sec-Fetch-Site` headers (blocking DNS-rebinding and cross-site requests), and sends a strict Content-Security-Policy.
@@ -65,7 +75,8 @@ I used public Capri desktop projects as feature references. [lachydotmcg/capri-d
 - `companion.py` — local desktop window, Ollama connection, memory, safe tools, Vosk, and Kokoro TTS.
 - `web/` — animated companion interface.
 - `setup_local_model.ps1` — confirmation-gated first-time installation and downloads.
-- `run_capri.bat` — starts Capri after setup.
+- `run_capri.bat` — starts Capri after setup with a console (the desktop icon starts her without one).
+- `install_desktop_shortcut.bat` — (re)creates the Capri desktop and Start-menu icons.
 - `CAPRI_ASSET_LICENSE.md` — required license terms and attribution for the noncommercial fan sprites.
 - `THIRD_PARTY_NOTICES.md` — explains which terms apply to art and code, including projects used as references.
 - `AI_PROJECT_RESEARCH.md` — GitHub projects reviewed for useful, license-compatible features.
@@ -90,9 +101,9 @@ pip install ruff && ruff check .
 node --check web/app.js
 ```
 
-The tests cover command validation, tool selection, context budgeting, the approval flow, request-origin checks, avatar upload validation, memory/history storage, streaming chat, and model unloading. GitHub Actions runs them on every push, and also parses `setup_local_model.ps1` on a Windows runner.
+The tests cover command and file sandboxes, tool selection and auto-run tools, the calculator, timers, secret redaction, context budgeting, the approval flow, the launch key and request-origin checks, avatar upload validation, encrypted memory/history storage, streaming chat, and model unloading. GitHub Actions runs them on Linux and Windows on every push, and parses the PowerShell scripts.
 
-Set `CAPRI_DEBUG=1` to print server tracebacks to the console while troubleshooting (conversation text is never logged). Set `CAPRI_MODEL` to change the default model name.
+Set `CAPRI_DEBUG=1` to print server tracebacks to the console while troubleshooting (conversation text is never logged). Set `CAPRI_MODEL` to change the default model name, and `CAPRI_NUM_CTX=4096` to try a larger context after checking VRAM and latency. `CAPRI_BROWSER_MODE=1` opens Capri in your browser instead of her own window.
 
 ## License
 

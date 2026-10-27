@@ -8,17 +8,19 @@ These are the source and documentation files intended for the repository. Runtim
 | `PROJECT_GUIDE.md` | Full architecture, dependencies, file map, local data boundaries, safety limits, and handoff notes. |
 | `ROADMAP.md` | Current state, planned improvements, and privacy guardrails. |
 | `PROJECT_FILES.md` | This tracked-file inventory. |
+| `CLAUDE_BUILD_REFERENCE.md` | Complete file maps, feature/function descriptions, ranked model and voice options, reuse boundaries, and Claude implementation guidance. |
 | `.gitignore` | Excludes local memory, chats, avatars, model downloads, environments, and temporary files. |
 | `CAPRI_ASSET_LICENSE.md` | Required attribution and PolyForm Noncommercial terms for the third-party Capri art. |
 | `LICENSE` | MIT license for original CapriCompanion source code, copyright ACE07X. |
 | `THIRD_PARTY_NOTICES.md` | Separates ACE07X source ownership from fan art terms and upstream project references. |
-| `CLAUDE_BUILD_REFERENCE.md` | Complete file maps, feature/function descriptions, ranked model and voice options, reuse boundaries, and Claude implementation guidance. |
 | `AI_PROJECT_RESEARCH.md` | GitHub AI projects reviewed, useful ideas, and separate code/art license boundaries. |
 | `companion.py` | Local web server, Ollama requests, user memory, screen capture, approved desktop/file tools, Vosk, and Kokoro voice. |
 | `requirements.txt` | Python package versions needed by the app, including Pillow for screen capture. |
 | `setup_local_model.ps1` | Confirmation-gated installation and download of the local model and speech assets. |
 | `setup_local_model.bat` | Double-click wrapper that runs the setup script (double-clicking a `.ps1` opens it in an editor instead). |
-| `run_capri.bat` | Launches Capri in a native Windows desktop window. |
+| `run_capri.bat` | Launches Capri with a console window (troubleshooting); Capri starts her own Ollama service. |
+| `install_desktop_shortcut.ps1` / `.bat` | Creates the Capri Desktop and Start-menu shortcuts with her face icon (runs `pythonw.exe`, no console). Setup calls it. |
+| `tools/make_icon.py` | Rebuilds the icon from the idle sprite. |
 | `tests/test_companion.py` | Unit and server tests (stdlib `unittest`, fake Ollama; no GPU or Windows needed). |
 | `pyproject.toml` | Ruff lint configuration. |
 | `.gitattributes` | Forces CRLF for `.bat`/`.ps1`, LF elsewhere. |
@@ -27,7 +29,9 @@ These are the source and documentation files intended for the repository. Runtim
 | `web/index.html` | Chat, voice, memory, sound-effect, media, avatar, and setup UI. |
 | `web/styles.css` | Neon yellow, hot-pink, red, and green theme; responsive layout; avatar animation effects. |
 | `web/app.js` | Streamed local chat, local archive, voice playback, avatar reactions, approval cards, and local controls. |
+| `web/pet.html`, `web/pet.js`, `web/pet.css` | The transparent roaming window: Capri moving around the desktop, her speech bubble, and right-click menu. |
 | `web/capri.png` | Main Capri artwork used by the interface. |
+| `web/capri.ico`, `web/capri-icon.png` | Capri face icon for the shortcut, window, taskbar, and page (derived from the Lachy sprite; same license). |
 | `web/sprites/idle.png` | Idle animation frames. |
 | `web/sprites/blink.png` | Blink animation frames. |
 | `web/sprites/blink_glitch.png` | Blink/glitch transition frames. |
