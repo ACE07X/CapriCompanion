@@ -1,0 +1,35 @@
+/* The roaming window is transparent: only Capri, her speech bubble, and her menu are drawn. */
+:root { color-scheme: normal; --yellow: #fcee0a; --cyan: #02d7f2; --red: #ff003c; }
+* { box-sizing: border-box; }
+html, body { margin: 0; width: 100%; height: 100%; overflow: hidden; background: transparent; user-select: none; font-family: "Bahnschrift", "Segoe UI", sans-serif; }
+.hidden { display: none !important; }
+
+.stage { position: absolute; left: 0; right: 0; bottom: 0; height: 205px; display: flex; justify-content: center; align-items: flex-end; }
+#capri {
+  width: 128px; height: 205px; image-rendering: pixelated; cursor: grab;
+  filter: drop-shadow(0 0 10px rgba(255, 0, 60, .45));
+  transform: translateY(var(--bob, 0px)) scaleX(var(--facing, 1));
+  transition: opacity .12s steps(2, end);
+}
+#capri:active { cursor: grabbing; }
+body.phasing #capri { animation: phase .35s steps(1, end) 1; filter: drop-shadow(4px 0 rgba(2, 215, 242, .9)) drop-shadow(-4px 0 rgba(255, 0, 60, .9)); }
+body.gone #capri { opacity: 0; }
+body.sleeping #capri { filter: saturate(.6) drop-shadow(0 0 8px rgba(252, 238, 10, .3)); }
+body.busy #capri { filter: drop-shadow(0 0 12px rgba(2, 215, 242, .8)); }
+
+.bubble {
+  position: absolute; left: 8px; right: 8px; bottom: 196px; max-height: 92px; overflow: hidden;
+  padding: 8px 10px; font-size: 12px; line-height: 1.35; color: #e8f1ff;
+  background: rgba(8, 10, 20, .94); border: 1px solid var(--cyan); border-left: 3px solid var(--yellow);
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 0 100%);
+  box-shadow: 0 0 14px rgba(2, 215, 242, .35); animation: pop .18s ease-out;
+}
+.menu { position: absolute; top: 4px; left: 20px; right: 20px; display: flex; flex-direction: column; gap: 3px; padding: 6px; background: rgba(5, 6, 11, .96); border: 1px solid var(--yellow); }
+.menu button { height: 26px; border: 1px solid rgba(2, 215, 242, .45); background: rgba(2, 215, 242, .06); color: var(--cyan); font: 700 10px "Cascadia Mono", Consolas, monospace; letter-spacing: .14em; cursor: pointer; }
+.menu button:hover { background: var(--cyan); color: #05060b; }
+.menu button.danger { border-color: rgba(255, 0, 60, .6); color: var(--red); }
+.menu button.danger:hover { background: var(--red); color: #fff; }
+
+@keyframes phase { 0% { clip-path: inset(0); } 20% { clip-path: inset(10% 0 60%); } 40% { clip-path: inset(55% 0 20%); } 60% { clip-path: inset(30% 0 45%); } 80% { clip-path: inset(70% 0 5%); } 100% { clip-path: inset(0); } }
+@keyframes pop { from { transform: translateY(6px); opacity: 0; } to { transform: none; opacity: 1; } }
+@media (prefers-reduced-motion: reduce) { #capri, .bubble { animation: none !important; transition: none !important; } }

@@ -1,0 +1,22 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Capri Desktop Roamer</title>
+  <link rel="stylesheet" href="/assets/pet.css">
+  <script src="/assets/pet.js" defer></script>
+</head>
+<body>
+  <div class="bubble hidden" id="bubble" role="status" aria-live="polite"></div>
+  <div class="menu hidden" id="menu" role="menu">
+    <button type="button" data-action="chat" role="menuitem">OPEN CHAT</button>
+    <button type="button" data-action="roam" role="menuitem">STAY PUT</button>
+    <button type="button" data-action="home" role="menuitem">BACK TO MY CORNER</button>
+    <button type="button" data-action="hide" role="menuitem">HIDE CAPRI</button>
+    <button type="button" data-action="quit" role="menuitem" class="danger">QUIT CAPRI</button>
+  </div>
+  <div class="stage" id="stage">
+    <canvas id="capri" width="240" height="384" aria-label="Capri roaming your desktop. Double-click to chat, right-click for options, drag to move."></canvas>
+  </div>
+</body>
+</html>

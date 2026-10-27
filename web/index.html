@@ -4,7 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="color-scheme" content="dark">
-  <title>Capri — Desktop Companion</title>
+  <title>Capri // Desktop Companion</title>
+  <link rel="icon" href="/assets/capri-icon.png">
   <link rel="stylesheet" href="/assets/styles.css">
   <script src="/assets/app.js" defer></script>
 </head>
@@ -12,147 +13,112 @@
   <div class="app-shell">
     <header class="topbar">
       <div class="brand">
-        <span class="brand-mark" aria-hidden="true"><span></span><span></span><span></span></span>
+        <img class="brand-icon" src="/assets/capri-icon.png" alt="" width="40" height="40">
         <div>
-          <div class="brand-name">CAPRI</div>
-          <div class="brand-subtitle">LOCAL AI <span>•</span> PC CONTROLS</div>
+          <div class="brand-name glitch-text" data-text="CAPRI">CAPRI</div>
+          <div class="brand-subtitle">PROJECT CAPRICORN <span>//</span> LOCAL CONSTRUCT</div>
         </div>
       </div>
+
+      <div class="hud" aria-label="This PC's live resource use">
+        <div class="hud-meter" id="hud-cpu"><span class="hud-label">CPU</span><span class="hud-bar"><i></i></span><span class="hud-value">--</span></div>
+        <div class="hud-meter" id="hud-ram"><span class="hud-label">RAM</span><span class="hud-bar"><i></i></span><span class="hud-value">--</span></div>
+        <div class="hud-meter" id="hud-disk"><span class="hud-label">DISK</span><span class="hud-bar"><i></i></span><span class="hud-value">--</span></div>
+        <div class="hud-meter" id="hud-bat"><span class="hud-label">BAT</span><span class="hud-bar"><i></i></span><span class="hud-value">AC</span></div>
+      </div>
+
       <div class="top-actions">
-        <div class="model-wrap">
-          <label for="model-select">LOCAL MODEL</label>
-          <select id="model-select" aria-label="Choose a local model">
-            <option value="qwen3.5:4b">qwen3.5:4b</option>
-          </select>
-        </div>
-        <button class="icon-button" id="refresh-models" title="Refresh local models" aria-label="Refresh local models">↻</button>
-        <button class="icon-button" id="memory-open" title="Edit local memory" aria-label="Edit local memory">MEMORY</button>
-        <div class="voice-wrap">
-          <label for="voice-select">CAPRI VOICE</label>
-          <select id="voice-select" aria-label="Choose Capri's offline voice">
-            <option value="af_bella">Bella · bright</option>
-            <option value="af_heart">Heart · warm</option>
-            <option value="af_nicole">Nicole · airy</option>
-            <option value="af_sky">Sky · playful</option>
-          </select>
-        </div>
-        <button class="icon-button" id="voice-preview" title="Preview the selected offline voice" aria-label="Preview the selected offline voice">TEST</button>
-        <button class="icon-button voice-toggle on" id="voice-toggle" title="Toggle spoken replies" aria-label="Toggle spoken replies">VOICE ON</button>
-        <button class="icon-button sfx-toggle on" id="sfx-toggle" title="Toggle Capri's local sound effects" aria-label="Toggle local sound effects">SFX ON</button>
-        <button class="icon-button exit-button" id="exit-button" title="Close Capri" aria-label="Close Capri">EXIT</button>
+        <button class="chip-button" id="memory-open" title="Edit local memory">MEMORY</button>
+        <button class="chip-button exit-button" id="exit-button" title="Close Capri and free the GPU">EXIT</button>
       </div>
     </header>
 
-    <div class="city-ticker" aria-label="Local system status" aria-live="off">
-      <div class="ticker-node"><span class="ticker-pulse" aria-hidden="true"></span><b>CITY PULSE</b><span>LOCAL RELAY</span></div>
+    <div class="city-ticker" aria-label="Local system status">
+      <div class="ticker-node"><span class="ticker-pulse" aria-hidden="true"></span><b>NET//LOCAL</b></div>
       <span class="ticker-copy" id="city-ticker-copy">Your signal stays on this PC. Desktop actions wait for your approval.</span>
+      <span class="ticker-lock" title="Chat and memory are encrypted on disk; the API only answers this window.">ENCRYPTED · TOKEN-LOCKED</span>
       <time class="local-clock" id="local-clock" aria-label="Your local time">--:--</time>
     </div>
 
     <main class="workspace">
       <aside class="companion-panel">
-        <div class="signal-lines" aria-hidden="true"></div>
-        <div class="companion-heading">
-          <span class="online-dot" id="status-dot"></span>
-          <span id="status-label">LOCAL SYSTEM CHECK</span>
-        </div>
-
-        <div class="avatar-stage">
-          <div class="avatar-aura"></div>
-          <div class="orbit orbit-one"></div>
-          <div class="orbit orbit-two"></div>
-          <div class="avatar" id="avatar" data-state="idle" aria-label="Animated Capri avatar">
-            <canvas class="capri-sprite" id="capri-sprite" width="480" height="768" hidden aria-label="Animated Capri sprite"></canvas>
-            <img class="avatar-photo" id="avatar-photo" src="/assets/capri.png" alt="Capri fan artwork by Lachy, used under PolyForm Noncommercial 1.0.0">
-            <svg viewBox="0 0 300 360" role="img" aria-label="An original neon cyberpunk hologram with a luminous mask">
-              <defs>
-                <linearGradient id="mane" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stop-color="#8ffff2"/>
-                  <stop offset=".42" stop-color="#6e8cff"/>
-                  <stop offset="1" stop-color="#ef3d83"/>
-                </linearGradient>
-                <linearGradient id="mask" x1=".15" y1="0" x2=".85" y2="1">
-                  <stop offset="0" stop-color="#effffc"/>
-                  <stop offset=".52" stop-color="#9df6e9"/>
-                  <stop offset="1" stop-color="#55aab9"/>
-                </linearGradient>
-                <linearGradient id="coat" x1="0" y1="0" x2="1" y2="1">
-                  <stop offset="0" stop-color="#11182b"/>
-                  <stop offset=".55" stop-color="#202649"/>
-                  <stop offset="1" stop-color="#372342"/>
-                </linearGradient>
-                <filter id="glow" x="-60%" y="-60%" width="220%" height="220%">
-                  <feGaussianBlur stdDeviation="4" result="blur"/>
-                  <feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge>
-                </filter>
-              </defs>
-              <ellipse cx="150" cy="331" rx="78" ry="12" fill="#29e9d4" opacity=".17"/>
-              <g class="avatar-art">
-                <path d="M54 344c8-45 35-77 96-77 57 0 86 31 96 77z" fill="url(#coat)" stroke="#25e7d6" stroke-width="2"/>
-                <path d="M93 302l27-31 30 34 30-34 28 31-16 42h-83z" fill="#131b31" stroke="#f24a8b" stroke-width="2"/>
-                <path d="M121 278l29 27 29-27-12-19h-34z" fill="#0e2635" stroke="#59f4df" stroke-width="2"/>
-                <path d="M150 294l11 13-11 17-11-17z" fill="#d4ff68" filter="url(#glow)"/>
-                <path d="M73 321h35m84 0h35M84 334h25m82 0h25" stroke="#f34a8d" stroke-width="3" opacity=".8"/>
-                <path d="M120 245h60l9 34-39 29-39-29z" fill="url(#mask)" stroke="#b5fff1" stroke-width="2"/>
-                <path d="M85 146c-13-51 1-101 38-123 18-11 41-13 56-4 30-9 60 15 72 48 13 35 8 78 2 115l-19 62-33 24-18-34h-67l-24 29-22-44z" fill="url(#mane)" stroke="#a5fff1" stroke-width="2"/>
-                <path d="M91 103C77 78 78 48 92 28c-2 31 7 47 19 60-7-31 4-58 22-76-6 30-1 53 11 70 9-31 27-50 53-58-17 24-20 45-16 65 17-19 37-26 57-24-25 13-38 30-45 51-16-10-29-15-44-14-20 1-36 8-58 22z" fill="#14273a" opacity=".96"/>
-                <path d="M108 123c11-16 25-25 42-26 18-1 33 8 44 23l-4 77c-2 29-18 50-39 52-23 2-40-18-43-48z" fill="url(#mask)" stroke="#d7fff7" stroke-width="2"/>
-                <path d="M108 143l27-12 17 9 18-11 26 12-5-21c-11-16-25-23-42-22-18 1-32 10-42 27z" fill="#18243c"/>
-                <path d="M116 154l27-4 9 8-35 5zM157 158l9-8 27 4-1 9z" fill="#13263b"/>
-                <ellipse class="eye-glow" cx="132" cy="158" rx="8" ry="3.5" fill="#c9ff68" filter="url(#glow)"/>
-                <ellipse class="eye-glow" cx="175" cy="158" rx="8" ry="3.5" fill="#c9ff68" filter="url(#glow)"/>
-                <path d="M150 162l-4 22 7 2" fill="none" stroke="#508a91" stroke-width="2" stroke-linecap="round"/>
-                <path d="M139 201h23" fill="none" stroke="#235a67" stroke-width="3" stroke-linecap="round"/>
-                <path class="talk-mouth" d="M140 201c6 6 14 6 21 0" fill="none" stroke="#fb4a90" stroke-width="3" stroke-linecap="round"/>
-                <path d="M109 174l-15 10 16 22m84-32 15 10-16 22" fill="none" stroke="#26f1d9" stroke-width="2" opacity=".9"/>
-                <path d="M102 119l-18 19 8 21m105-57 20-21 8 29m-117 131-13 17m128-18 14 19" fill="none" stroke="#d5ff70" stroke-width="3"/>
-                <path d="M78 86l-21-12 14 31m164 11 24-17-13 36M87 229l-19 18 30-8m113-2 28 15-13-29" fill="none" stroke="#fb4a90" stroke-width="3"/>
-                <path d="M98 111c-11 29-14 60-8 91m112-106c13 33 16 66 7 99" fill="none" stroke="#b2fff0" stroke-width="2" stroke-dasharray="3 8" opacity=".8"/>
-                <circle cx="213" cy="133" r="12" fill="#102035" stroke="#d5ff70" stroke-width="2"/>
-                <circle cx="213" cy="133" r="4" fill="#d5ff70" filter="url(#glow)"/>
-                <path d="M211 119v-9m14 23h9m-21 15v8m-14-23h-9" stroke="#2cf2db" stroke-width="2"/>
-                <path d="M66 184h14m142-53h13M86 64h12m102 196h17" stroke="#e9ffad" stroke-width="3" opacity=".85"/>
-              </g>
-            </svg>
+        <div class="holo-tank frame">
+          <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
+          <div class="tank-head">
+            <span class="online-dot" id="status-dot"></span>
+            <span id="status-label">LOCAL SYSTEM CHECK</span>
+            <span class="tank-id">UNIT C-01</span>
           </div>
-          <div class="scan-beam" aria-hidden="true"></div>
-        </div>
-        <div class="avatar-image-controls">
-          <button class="text-button" id="avatar-select" type="button" title="Choose an avatar image already on this PC">USE A LOCAL AVATAR IMAGE</button>
-          <button class="text-button hidden" id="avatar-reset" type="button">RESTORE ORIGINAL</button>
-          <input id="avatar-file" type="file" accept="image/png,image/jpeg,image/webp" hidden>
-        </div>
-
-        <div class="persona-card">
-          <div class="eyebrow">DIGITAL CONSTRUCT</div>
-          <h1>Capri<span class="accent">.</span></h1>
-          <p id="status-copy">Your local little troublemaker is getting ready.</p>
-          <div class="tag-row"><span>CURIOUS</span><span>CYBERSEC</span><span>ON YOUR SIDE</span></div>
-        </div>
-
-        <div class="panel-divider"></div>
-        <div class="quick-actions">
-          <div class="section-label">LOCAL TOOLS</div>
-          <button class="quick-button" id="security-check"><span class="quick-icon shield">⌑</span><span><b>Security check</b><small>Defender + firewall status</small></span><span class="arrow">↗</span></button>
-          <button class="quick-button" id="setup-open"><span class="quick-icon download">↓</span><span><b>Set up local models</b><small>One-time download, then offline</small></span><span class="arrow">↗</span></button>
+          <div class="avatar-stage">
+            <div class="tank-grid" aria-hidden="true"></div>
+            <div class="avatar-aura" aria-hidden="true"></div>
+            <div class="avatar" id="avatar" data-state="idle" aria-label="Animated Capri avatar">
+              <canvas class="capri-sprite" id="capri-sprite" width="480" height="768" hidden aria-label="Animated Capri sprite"></canvas>
+              <img class="avatar-photo" id="avatar-photo" src="/assets/capri.png" alt="Capri fan artwork by Lachy, used under PolyForm Noncommercial 1.0.0">
+            </div>
+            <div class="scan-beam" aria-hidden="true"></div>
+          </div>
+          <p class="status-copy" id="status-copy">Your local little troublemaker is getting ready.</p>
+          <div class="avatar-image-controls">
+            <button class="text-button" id="avatar-select" type="button" title="Choose an avatar image already on this PC">SWAP SKIN</button>
+            <button class="text-button hidden" id="avatar-reset" type="button">RESTORE CAPRI</button>
+            <input id="avatar-file" type="file" accept="image/png,image/jpeg,image/webp" hidden>
+          </div>
         </div>
 
-        <div class="privacy-note"><span class="lock-icon">▣</span><span>Memory stays here · actions need your approval.</span></div>
+        <section class="deck frame" aria-label="Capri settings">
+          <div class="section-label">DECK CONFIG</div>
+          <div class="field-row">
+            <label for="model-select">MODEL</label>
+            <select id="model-select" aria-label="Choose a local model">
+              <option value="">checking…</option>
+            </select>
+            <button class="icon-button" id="refresh-models" title="Refresh local models" aria-label="Refresh local models">↻</button>
+          </div>
+          <div class="field-row">
+            <label for="voice-select">VOICE</label>
+            <select id="voice-select" aria-label="Choose Capri's offline voice">
+              <option value="capri">Capri · construct blend</option>
+            </select>
+            <button class="icon-button" id="voice-preview" title="Preview the selected offline voice" aria-label="Preview the selected offline voice">▶</button>
+          </div>
+          <div class="toggle-row">
+            <button class="toggle on" id="voice-toggle" aria-pressed="true" title="Spoken replies">VOICE</button>
+            <button class="toggle on" id="fx-toggle" aria-pressed="true" title="Digital-construct filter on Capri's voice">VOICE FX</button>
+            <button class="toggle on" id="sfx-toggle" aria-pressed="true" title="Interface sound effects">SFX</button>
+          </div>
+          <div class="toggle-row">
+            <button class="toggle on" id="roam-toggle" aria-pressed="true" title="Let Capri roam your desktop in her own little window">ROAM</button>
+            <button class="toggle" id="online-toggle" aria-pressed="false" title="Allow web searches (your search words are sent to the search engine)">ONLINE</button>
+            <button class="toggle power" id="power-toggle" aria-pressed="false" title="Allow any normal-user command, each one approved by you">POWER</button>
+          </div>
+        </section>
+
+        <section class="quick-actions frame" aria-label="Local tools">
+          <div class="section-label">QUICK OPS</div>
+          <button class="quick-button" id="security-check"><span class="quick-icon">⛨</span><span><b>Security scan</b><small>Defender + firewall · read-only</small></span></button>
+          <button class="quick-button" id="setup-open"><span class="quick-icon">⇩</span><span><b>Local models</b><small>One-time setup, then offline</small></span></button>
+          <div class="timers hidden" id="timers" aria-live="polite"></div>
+        </section>
       </aside>
 
-      <section class="chat-panel" aria-label="Conversation with Capri">
+      <section class="chat-panel frame" aria-label="Conversation with Capri">
+        <span class="corner tl"></span><span class="corner tr"></span><span class="corner bl"></span><span class="corner br"></span>
         <div class="chat-heading">
           <div>
-            <div class="eyebrow">YOUR PRIVATE CHANNEL</div>
-            <h2>Talk to Capri <span class="live-mark">●</span></h2>
+            <div class="eyebrow">SECURE CHANNEL // 127.0.0.1</div>
+            <h1 class="glitch-text" data-text="TALK TO CAPRI">TALK TO CAPRI</h1>
           </div>
           <div class="chat-header-actions">
+            <span class="now-playing hidden" id="now-playing" title="What Spotify is playing"></span>
             <div class="media-controls" aria-label="Controls for the active Windows media player">
-              <span class="media-label" title="Controls the active Windows media player, such as Spotify">PLAYER</span>
-              <button class="media-button" data-media-action="previous" title="Previous track" aria-label="Previous track">|◀</button>
-              <button class="media-button" data-media-action="play_pause" title="Play or pause" aria-label="Play or pause">▶Ⅱ</button>
-              <button class="media-button" data-media-action="next" title="Next track" aria-label="Next track">▶|</button>
-              <button class="media-button" data-media-action="replay" title="Replay current track when the player supports it" aria-label="Replay current track">↶</button>
+              <button class="media-button" data-media-action="previous" title="Previous track" aria-label="Previous track">⏮</button>
+              <button class="media-button" data-media-action="play_pause" title="Play or pause" aria-label="Play or pause">⏯</button>
+              <button class="media-button" data-media-action="next" title="Next track" aria-label="Next track">⏭</button>
+              <span class="media-sep" aria-hidden="true"></span>
+              <button class="media-button" data-media-action="volume_down" title="Volume down" aria-label="Volume down">−</button>
+              <button class="media-button" data-media-action="mute" title="Mute or unmute" aria-label="Mute or unmute">⊘</button>
+              <button class="media-button" data-media-action="volume_up" title="Volume up" aria-label="Volume up">+</button>
             </div>
             <button class="text-button" id="clear-chat">CLEAR CHAT</button>
           </div>
@@ -160,47 +126,53 @@
         <div class="chat-log" id="chat-log" aria-live="polite" aria-relevant="additions text"></div>
         <div class="chat-status" id="chat-status" aria-live="polite">LOCAL MODEL READY WHEN YOU ARE</div>
         <div class="composer-wrap">
-          <div class="composer-tools">
-            <button class="mic-button" id="mic-button" title="Start or stop voice input" aria-label="Start voice input"><span class="mic-symbol">◉</span><span id="mic-label">VOICE CHAT</span></button>
-            <button class="text-button hidden" id="stop-speech" type="button" title="Stop Capri talking (Esc)">■ STOP VOICE</button>
-            <span class="input-hint">Tap VOICE CHAT to talk. Esc stops her voice. Ask me to look at your screen; I’ll ask first.</span>
-          </div>
           <div class="composer">
+            <button class="mic-button" id="mic-button" title="Start or stop voice input" aria-label="Start voice input"><span class="mic-symbol">◉</span><span id="mic-label">VOICE</span></button>
+            <span class="prompt-mark" aria-hidden="true">&gt;_</span>
             <textarea id="message-input" rows="1" maxlength="8000" placeholder="Say something, choom…" aria-label="Message Capri"></textarea>
-            <button id="send-button" class="send-button" aria-label="Send message"><span>SEND</span><b>↑</b></button>
+            <button class="text-button hidden" id="stop-speech" type="button" title="Stop Capri talking (Esc)">■ STOP</button>
+            <button id="send-button" class="send-button" aria-label="Send message">SEND</button>
           </div>
-          <div class="composer-foot"><span>LOCAL CHAT · NO CLOUD</span><span id="connection-foot">CHECKING LOCAL LINK…</span></div>
+          <div class="composer-foot"><span>ENTER SENDS · SHIFT+ENTER NEW LINE · ESC SILENCES</span><span id="connection-foot">CHECKING LOCAL LINK…</span></div>
         </div>
       </section>
     </main>
   </div>
 
   <div class="modal-backdrop hidden" id="setup-modal" role="dialog" aria-modal="true" aria-labelledby="setup-title">
-    <div class="modal-card">
+    <div class="modal-card frame">
       <button class="modal-close" data-close="setup-modal" aria-label="Close">×</button>
       <div class="eyebrow">ONE-TIME SETUP</div>
       <h2 id="setup-title">Give me a local brain.</h2>
-      <p>The default is Qwen3.5 4B: about 3.3–4.0 GB on disk, with a 2K context window to leave more room for your other apps and games. It stays loaded while Capri is open so it does not reload for every conversation.</p>
+      <p>The default is Qwen3.5 4B: about 3.3–4.0 GB on disk, with a 2K context window that leaves room for your other apps and games. Capri starts her own private Ollama service, keeps the model warm while she is open, and frees it when you exit.</p>
       <ol>
         <li>Open the Capri project folder (the one containing <b>run_capri.bat</b>).</li>
-        <li>Double-click <b>setup_local_model.bat</b>. It asks before installing anything.</li>
+        <li>Double-click <b>setup_local_model.bat</b>. It asks before installing anything and adds a <b>Capri</b> icon to your desktop.</li>
         <li>Wait for Ollama, the model, and offline voice files to download once.</li>
-        <li>When the download finishes, use ↻ to refresh. If Capri was closed, start <b>run_capri.bat</b>.</li>
+        <li>Use ↻ to refresh, or start Capri from her desktop icon.</li>
       </ol>
-      <p class="small-print">After setup, conversation, screen vision, microphone transcription, and speech output run on this PC. Screen capture is one-time and requires your approval; images are not saved. Desktop commands are limited to read-only checks and require approval. Speech uses an original local Kokoro voice style, not a clone of the anime actor.</p>
+      <p class="small-print">After setup, conversation, screen vision, microphone transcription, and speech output run on this PC. Screen capture is one-time and requires your approval; images are not saved. Desktop commands are limited to read-only checks inside your own folders and require approval. Capri's voice is an original Kokoro blend, not a clone of the anime actor.</p>
       <button class="primary-button" data-close="setup-modal">GOT IT</button>
     </div>
   </div>
 
   <div class="modal-backdrop hidden" id="memory-modal" role="dialog" aria-modal="true" aria-labelledby="memory-title">
-    <div class="modal-card memory-card">
+    <div class="modal-card memory-card frame">
       <button class="modal-close" data-close="memory-modal" aria-label="Close">×</button>
-      <div class="eyebrow">STORED ONLY ON THIS PC</div>
+      <div class="eyebrow">ENCRYPTED · STORED ONLY ON THIS PC</div>
       <h2 id="memory-title">What should I remember?</h2>
-      <p>Tell Capri “remember I like…” to save a hobby, preference, or project. She asks before saving. Chat history and approved notes stay on this PC; edit or clear either whenever you want. Never store passwords or secrets.</p>
-      <p class="small-print">To fit her small context window, Capri reads about the most recent 900 characters here (roughly 15 short notes). Keep the notes you care about at the bottom, and trim old ones.</p>
-      <textarea id="memory-input" rows="7" maxlength="15000" placeholder="Examples: I prefer short answers. I’m building a game mod and Capri Companion…"></textarea>
-      <div class="modal-actions"><button class="text-button" id="memory-clear">CLEAR MEMORY</button><button class="primary-button" id="memory-save">SAVE MEMORY</button></div>
+      <p>Tell Capri “remember I like…” to save a hobby, preference, or project. She asks before saving. Keys, passwords, and card numbers are stripped automatically. Never store secrets here.</p>
+      <textarea id="memory-input" rows="9" maxlength="15000" placeholder="Examples: I prefer short answers. I’m building a game mod…"></textarea>
+      <div class="memory-meter"><span id="memory-count">0 characters</span><span id="memory-fit"></span></div>
+      <div class="modal-actions"><button class="text-button danger" id="memory-clear">CLEAR MEMORY</button><button class="primary-button" id="memory-save">SAVE MEMORY</button></div>
+    </div>
+  </div>
+
+  <div class="lock-screen hidden" id="lock-screen" role="alertdialog" aria-labelledby="lock-title">
+    <div class="modal-card frame">
+      <div class="eyebrow">ACCESS DENIED</div>
+      <h2 id="lock-title">This link has no launch key.</h2>
+      <p>Capri only answers the window that started her. Open her from the desktop icon or <b>run_capri.bat</b>.</p>
     </div>
   </div>
 
@@ -208,4 +180,3 @@
   <audio id="speech-audio" preload="none"></audio>
 </body>
 </html>
-
