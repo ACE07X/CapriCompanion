@@ -4,6 +4,8 @@ A local-first Windows desktop companion inspired by Capri from *Cyberpunk: Edger
 
 **Repository visibility:** public. Original CapriCompanion source code is copyright © 2026 ACE07X and licensed under MIT; bundled Capri sprites have separate noncommercial terms. See [`LICENSE`](LICENSE), [`CAPRI_ASSET_LICENSE.md`](CAPRI_ASSET_LICENSE.md), and [`THIRD_PARTY_NOTICES.md`](THIRD_PARTY_NOTICES.md) for the boundaries.
 
+For a Claude-ready inventory of every tracked file, animation and desktop feature references, model/voice rankings, and separate licensing rules, see [`CLAUDE_BUILD_REFERENCE.md`](CLAUDE_BUILD_REFERENCE.md).
+
 ## What is included
 
 - **Faster local chat:** Qwen3.5 4B uses a four-message recent context, a 2,048-token context window, and a 64-token reply cap for ordinary chat (144 for requests that need detail). Ordinary replies stream as they are generated, and only relevant PC-action definitions are sent to the model. The model stays loaded while Capri is open and unloads on exit; the first reply after launch still has to load it.
